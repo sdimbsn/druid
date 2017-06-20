@@ -50,7 +50,7 @@ public class OakIncrementalIndex extends IncrementalIndex<BufferAggregator> {
     }
 
 
-     class OakFactsHolder implements FactsHolder {
+    class OakFactsHolder implements FactsHolder {
         @Override
         public int getPriorIndex(TimeAndDims key) {
             throw new UnsupportedOperationException();
@@ -90,6 +90,17 @@ public class OakIncrementalIndex extends IncrementalIndex<BufferAggregator> {
         public void clear() {
 
         }
+    }
+
+
+    @Override
+    protected Integer addToFacts(AggregatorFactory[] metrics, boolean deserializeComplexMetrics, boolean reportParseExceptions, InputRow row, AtomicInteger numEntries, TimeAndDims key, ThreadLocal<InputRow> rowContainer, Supplier<InputRow> rowSupplier) throws IndexSizeExceededException {
+        if(metrics.length > 0 && getAggs()[0] == null) {
+            // init aggreagators lazily
+        }
+
+        rows.compute(key, (k, v) -> v == null ? initBuffer(k, row) : aggregateValue(v, row) );
+        return rows.size();
     }
 
     @Override
@@ -140,15 +151,6 @@ public class OakIncrementalIndex extends IncrementalIndex<BufferAggregator> {
 
     }
 
-    @Override
-    protected Integer addToFacts(AggregatorFactory[] metrics, boolean deserializeComplexMetrics, boolean reportParseExceptions, InputRow row, AtomicInteger numEntries, TimeAndDims key, ThreadLocal<InputRow> rowContainer, Supplier<InputRow> rowSupplier) throws IndexSizeExceededException {
-        if(metrics.length > 0 && getAggs()[0] == null) {
-            // init aggreagators lazily
-        }
-
-        rows.compute(key, (k, v) -> v == null ? initBuffer(k, row) : aggregateValue(v, row) );
-        return rows.size();
-    }
 
     @Override
     public int getLastRowIndex() {

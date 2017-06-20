@@ -3,7 +3,6 @@ package io.druid.segment.incremental.oak;
 
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -34,6 +33,25 @@ public class Oak<K> implements ConcurrentNavigableMap<K , ByteBuffer> {
         this.deserializer = deserializer;
         this.comparator = comparator;
     }
+
+    /***
+     * The function executes atomically provided as input updateFunction.
+     *  @param key              The key to be updated
+     *
+     * @param updateFunction  The update function accepts reference to internal ByteBuffer and can update it in place
+     *                       and then return as a result of function call.
+     *                        If the key is not present in OakMap, updateFunction is expected to create
+     *                       a new on-heap ByteBuffer and return it as a result of function call. In this case, OakMap
+     *                        will create appropriate off-heap buffer internally and copy there the result.
+     *
+     *
+     */
+    @Override
+    public ByteBuffer compute(K key,
+                              BiFunction<? super K,? super ByteBuffer,? extends ByteBuffer> updateFunction) {
+        throw new UnsupportedOperationException();
+    }
+
 
     @Override
     public int size() {
@@ -236,10 +254,5 @@ public class Oak<K> implements ConcurrentNavigableMap<K , ByteBuffer> {
         return null;
     }
 
-    @Override
-    public ByteBuffer compute(K key,
-                     BiFunction<? super K,? super ByteBuffer,? extends ByteBuffer> remappingFunction) {
-        throw new UnsupportedOperationException();
-    }
 
 }
